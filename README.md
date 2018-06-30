@@ -1,0 +1,1 @@
+# reactphp-inspector-child-process-pool
