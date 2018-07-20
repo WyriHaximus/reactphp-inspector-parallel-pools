@@ -11,6 +11,7 @@
   ],
   "require": {
     "php": "^7.2",
+    "wyrihaximus/react-child-process-pool": "^1.4",
     "wyrihaximus/react-inspector": "dev-master"
   },
   "require-dev": {
@@ -35,15 +36,7 @@
   "extra": {
     "react-inspector": {
       "collectors": {
-        "WyriHaximus\\React\\Inspector\\CPUUsage": "src"
-      },
-      "metrics": [
-        "cpu.usage"
-      ],
-      "reset": {
-        "totals": [
-          "cpu.usage"
-        ]
+        "WyriHaximus\\React\\Inspector\\ChildProcessPools": "src"
       }
     }
   },
