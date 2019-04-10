@@ -1,5 +1,5 @@
 {
-  "name": "wyrihaximus/react-inspector-child-process-pools",
+  "name": "wyrihaximus/react-inspector-parallel-pools",
   "description": "Child process pools collector for wyrihaximus/react-inspector",
   "license": "MIT",
   "authors": [
@@ -10,78 +10,81 @@
     }
   ],
   "require": {
-    "php": "^7.2",
-    "wyrihaximus/react-child-process-pool": "^1.4",
-    "wyrihaximus/react-inspector": "dev-master"
+    "php": "^7.3",
+    "wyrihaximus/pool-info": "dev-master",
+    "wyrihaximus/react-inspector": "dev-master",
+    "wyrihaximus/react-parallel": "dev-master"
   },
   "require-dev": {
-    "api-clients/test-utilities": "^5.0"
-  },
-  "autoload": {
-    "psr-4": {
-      "WyriHaximus\\React\\Inspector\\ChildProcessPools\\": "src/"
-    }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "WyriHaximus\\React\\Tests\\Inspector\\ChildProcessPools\\": "src/"
-    }
+    "wyrihaximus/async-test-utilities": "^1.1"
   },
   "config": {
-    "sort-packages": true,
     "platform": {
-      "php": "7.2"
-    }
+      "php": "7.3"
+    },
+    "sort-packages": true
   },
   "extra": {
     "react-inspector": {
       "collectors": {
-        "WyriHaximus\\React\\Inspector\\ChildProcessPools": "src"
+        "WyriHaximus\\React\\Inspector\\ParallelPools": "src"
       }
     }
   },
+  "autoload": {
+    "psr-4": {
+      "WyriHaximus\\React\\Inspector\\ParallelPools\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "WyriHaximus\\React\\Tests\\Inspector\\ParallelPools\\": "tests/"
+    }
+  },
   "scripts": {
-    "ensure-installed": "composer install --ansi -n -q",
+    "post-install-cmd": [
+      "composer normalize"
+    ],
+    "post-update-cmd": [
+      "composer normalize"
+    ],
+    "ci-coverage": [
+      "if [ -f ./build/logs/clover.xml ]; then wget https://scrutinizer-ci.com/ocular.phar && php ocular.phar code-coverage:upload --format=php-clover ./build/logs/clover.xml; fi"
+    ],
     "cs": [
-      "@ensure-installed",
       "php-cs-fixer fix --config=.php_cs --ansi --dry-run --diff --verbose --allow-risky=yes --show-progress=estimating"
     ],
     "cs-fix": [
-      "@ensure-installed",
       "php-cs-fixer fix --config=.php_cs --ansi --verbose --allow-risky=yes --show-progress=estimating"
     ],
-    "unit": [
-      "@ensure-installed",
-      "phpunit --colors=always -c phpunit.xml.dist"
-    ],
-    "unit-coverage": [
-      "@ensure-installed",
-      "phpunit --colors=always -c phpunit.xml.dist --coverage-text --coverage-html covHtml --coverage-clover ./build/logs/clover.xml"
+    "infection": [
+      "infection --ansi --threads=4"
     ],
     "lint-php": [
-      "@ensure-installed",
       "parallel-lint --exclude vendor ."
     ],
     "qa-all": [
+      "composer validate --ansi",
+      "composer normalize --ansi",
       "@lint-php",
       "@cs",
+      "@stan",
       "@unit"
     ],
-    "qa-all-coverage": [
+    "qa-all-extended": [
+      "composer validate --ansi",
+      "composer normalize --ansi",
       "@lint-php",
       "@cs",
-      "@unit-coverage"
-    ],
-    "qa-windows": [
-      "@lint-php",
-      "@cs",
-      "@unit"
+      "@stan",
+      "@unit-coverage",
+      "@infection"
     ],
     "qa-ci": [
       "@unit"
     ],
     "qa-ci-extended": [
-      "@qa-all-coverage"
+      "@qa-all-extended"
     ],
     "qa-ci-windows": [
       "@qa-windows"
@@ -89,8 +92,20 @@
     "qa-contrib": [
       "@qa-all"
     ],
-    "ci-coverage": [
-      "if [ -f ./build/logs/clover.xml ]; then wget https://scrutinizer-ci.com/ocular.phar && php ocular.phar code-coverage:upload --format=php-clover ./build/logs/clover.xml; fi"
+    "qa-windows": [
+      "@lint-php",
+      "@cs",
+      "@stan",
+      "@unit"
+    ],
+    "stan": [
+      "phpstan analyse src tests --level max --ansi -c phpstan.neon"
+    ],
+    "unit": [
+      "phpunit --colors=always -c phpunit.xml.dist"
+    ],
+    "unit-coverage": [
+      "phpunit --colors=always -c phpunit.xml.dist --coverage-text --coverage-html covHtml --coverage-clover ./build/logs/clover.xml"
     ]
   }
 }

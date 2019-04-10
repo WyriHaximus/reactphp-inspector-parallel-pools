@@ -1,21 +1,21 @@
 <?php declare(strict_types=1);
 
-namespace WyriHaximus\React\Inspector\ChildProcessPools;
+namespace WyriHaximus\React\Inspector\ParallelPools;
 
+use function ApiClients\Tools\Rx\observableFromArray;
 use Rx\ObservableInterface;
-use WyriHaximus\React\ChildProcess\Pool\PoolInterface;
 use WyriHaximus\React\Inspector\CollectorInterface;
 use WyriHaximus\React\Inspector\Metric;
-use function ApiClients\Tools\Rx\observableFromArray;
+use WyriHaximus\React\Parallel\PoolInterface;
 
-final class ChildProcessPoolsCollector implements CollectorInterface
+final class ParallelPoolsCollector implements CollectorInterface
 {
     /**
      * @var PoolInterface[]
      */
     private $pools = [];
 
-    public function register(string $key, PoolInterface $pool)
+    public function register(string $key, PoolInterface $pool): void
     {
         $this->pools[$key] = $pool;
     }
@@ -27,7 +27,7 @@ final class ChildProcessPoolsCollector implements CollectorInterface
         foreach ($this->pools as $key => $pool) {
             foreach ($pool->info() as $metric => $value) {
                 $metrics[] = new Metric(
-                    'childprocess.pool.' . $key . '.' . $metric,
+                    'parallel.pool.' . $key . '.' . $metric,
                     $value
                 );
             }

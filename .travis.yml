@@ -1,5 +1,8 @@
 language: php
 
+services:
+  - docker
+
 ## Cache composer bits
 cache:
   directories:
@@ -8,59 +11,40 @@ cache:
 ## Build matrix for lowest and highest possible targets
 matrix:
   include:
-    - php: 7.0
+    - php: 7.3
       env:
         - qaExtended=true
-    - php: 7.1
-    - php: 7.2
-      env:
         - dropPlatform=false
-    - php: nightly
-      env:
-        - dropPlatform=false
-    - php: 7.0
-      env:
-        - dependencies=lowest
-    - php: 7.1
-      env:
-        - dependencies=lowest
-    - php: 7.2
+    - php: 7.3
       env:
         - dependencies=lowest
         - dropPlatform=false
-    - php: nightly
-      env:
-        - dependencies=lowest
-        - dropPlatform=false
-    - php: 7.0
-      env:
-        - dependencies=highest
-    - php: 7.1
-      env:
-        - dependencies=highest
-    - php: 7.2
-      env:
-        - dependencies=highest
-        - dropPlatform=false
-    - php: nightly
+    - php: 7.3
       env:
         - dependencies=highest
         - dropPlatform=false
 
+before_install:
+  - docker pull wyrihaximusnet/php:7.3-zts-alpine3.9-dev
+
 ## Install or update dependencies
 install:
+  - mkdir vendor
   - composer validate
-  - if [ -z "$dropPlatform" ]; then composer config --unset platform.php; fi;
-  - if [ -z "$qaExtended" ]; then phpenv config-rm xdebug.ini || :; fi;
-  - if [ -z "$dependencies" ]; then composer install --prefer-dist; fi;
-  - if [ "$dependencies" = "lowest" ]; then composer update --prefer-lowest --prefer-dist -n; fi;
-  - if [ "$dependencies" = "highest" ]; then composer update --prefer-dist -n; fi;
+  - if [ -z "$dropPlatform" ]; then composer config --unset platform.php --ignore-platform-reqs; fi;
+  #  - if [ -z "$qaExtended" ]; then phpenv config-rm xdebug.ini || :; fi;
+  - if [ -z "$dependencies" ]; then composer install --prefer-dist --ignore-platform-reqs; fi;
+  - if [ "$dependencies" = "lowest" ]; then composer update --prefer-lowest --prefer-dist -n --ignore-platform-reqs; fi;
+  - if [ "$dependencies" = "highest" ]; then composer update --prefer-dist -n --ignore-platform-reqs; fi;
   - composer show
 
 ## Run the actual test
 script:
-  - if [ -z "$qaExtended" ]; then make ci; fi;
-  - if [ "$qaExtended" = "true" ]; then make ci-extended; fi;
+  - if [ -z "$qaExtended" ]; then docker run --rm -v `pwd`:`pwd` -w `pwd` -t "wyrihaximusnet/php:7.3-zts-alpine3.9-dev" make ci; fi;
+  - if [ "$qaExtended" = "true" ]; then docker run --rm -v `pwd`:`pwd` -w `pwd` -t "wyrihaximusnet/php:7.3-zts-alpine3.9-dev" make ci-extended; fi;
 
 ## Gather coverage and set it to coverage servers
-after_script: if [ "$qaExtended" = "true" ]; then make ci-coverage; fi;
+after_script:
+  - if [ "$qaExtended" = "true" ]; then docker run --rm -v `pwd`:`pwd` -w `pwd` -t "wyrihaximusnet/php:7.3-zts-alpine3.9-dev" make ci-coverage; fi;
+  - docker run --rm -v `pwd`:`pwd` -w `pwd` -t "wyrihaximusnet/php:7.3-zts-alpine3.9-dev" php examples/sleep.php
+  - docker run --rm -v `pwd`:`pwd` -w `pwd` -t "wyrihaximusnet/php:7.3-zts-alpine3.9-dev" php examples/versions.php

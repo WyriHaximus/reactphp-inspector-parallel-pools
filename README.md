@@ -1,1 +1,1 @@
-# reactphp-inspector-child-process-pool
+# reactphp-inspector-parallel-pools
