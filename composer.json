@@ -11,7 +11,7 @@
   ],
   "require": {
     "php": "^7.3",
-    "wyrihaximus/pool-info": "dev-master",
+    "wyrihaximus/pool-info": "^1.0",
     "wyrihaximus/react-inspector": "dev-master",
     "wyrihaximus/react-parallel": "dev-master"
   },
